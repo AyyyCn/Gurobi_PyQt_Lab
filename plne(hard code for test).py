@@ -1,17 +1,14 @@
 from gurobipy import Model, GRB
 
 def main():
-    # Nombre de produits
-    nb_produits = int(input("Entrez le nombre de produits: "))
-    produits = [input(f"Entrez le nom du produit {i+1}: ") for i in range(nb_produits)]
-    
     # Données d'entrée
-    demande = {p: int(input(f"Entrez la demande pour le produit {p}: ")) for p in produits}
-    cout_achat = {p: float(input(f"Entrez le coût d'achat par lot pour le produit {p}: ")) for p in produits}
-    cout_stockage = {p: float(input(f"Entrez le coût de stockage par unité pour le produit {p}: ")) for p in produits}
-    cout_fixe_commande = {p: float(input(f"Entrez le coût fixe de commande pour le produit {p}: ")) for p in produits}
-    taille_lot = {p: int(input(f"Entrez la taille du lot pour le produit {p}: ")) for p in produits}
-    capacite_stockage = int(input("Entrez la capacité totale de stockage: "))
+    produits = ['A', 'B', 'C']  # Exemple de produits
+    demande = {'A': 100, 'B': 150, 'C': 200}  # Demande pour chaque produit
+    cout_achat = {'A': 20, 'B': 30, 'C': 25}  # Coût d'achat par lot
+    cout_stockage = {'A': 2, 'B': 1.5, 'C': 2.5}  # Coût de stockage par unité
+    cout_fixe_commande = {'A': 5, 'B': 7, 'C': 6}  # Coût fixe par commande
+    capacite_stockage = 500  # Capacité totale de stockage
+    taille_lot = {'A': 50, 'B': 50, 'C': 50}  # Taille de chaque lot de produit
 
     # Créer le modèle
     m = Model()

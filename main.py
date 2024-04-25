@@ -1,5 +1,5 @@
 import sys
-from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QWidget, QVBoxLayout
+from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QWidget
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -7,29 +7,22 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Main Window")
         self.setGeometry(100, 100, 300, 200)
 
-        # Create a central widget and set it to the main window
-        self.central_widget = QWidget(self)
-        self.setCentralWidget(self.central_widget)
-
-        # Create a vertical layout for the buttons
-        self.layout = QVBoxLayout(self.central_widget)
-
         # Button for PL
-        self.pl_button = QPushButton("PL")
-        self.layout.addWidget(self.pl_button)
+        self.pl_button = QPushButton("PL", self)
+        self.pl_button.setGeometry(50, 50, 100, 100)
         self.pl_button.clicked.connect(self.open_pl_window)
 
         # Button for PLNE
-        self.plne_button = QPushButton("PLNE")
-        self.layout.addWidget(self.plne_button)
+        self.plne_button = QPushButton("PLNE", self)
+        self.plne_button.setGeometry(150, 50, 100, 100)
         self.plne_button.clicked.connect(self.open_plne_window)
 
     def open_pl_window(self):
-        self.pl_window = SecondaryWindow("PL Window")
+        self.pl_window = SecondaryWindow("PL")
         self.pl_window.show()
 
     def open_plne_window(self):
-        self.plne_window = SecondaryWindow("PLNE Window")
+        self.plne_window = SecondaryWindow("PLNE")
         self.plne_window.show()
 
 class SecondaryWindow(QMainWindow):
