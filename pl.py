@@ -1,40 +1,32 @@
 from gurobipy import Model, GRB
 
-def lire_entiers(message, n):
-    return [int(x) for x in input(message).strip().split()[:n]]
+def optimize_paint_mix(n, composants, couts, viscosite, densite, visco_max, max_garbage):
+    m = Model()
 
-# Demande de données à l'utilisateur
-n = int(input("Entrez le nombre de produits: "))
-couts = lire_entiers("Entrez les coûts pour chaque produit, séparés par des espaces: ", n)
-durees = lire_entiers("Entrez les durées pour chaque produit, séparés par des espaces: ", n)
-profit_par_produit = lire_entiers("Entrez les profits pour chaque produit, séparés par des espaces: ", n)
-ouvriers_necessaires = lire_entiers("Entrez le nombre d'ouvriers nécessaires par produit, séparés par des espaces: ", n)
+    # Decision variables
+    x = {comp: m.addVar(name=f"x_{comp}") for comp in composants}
 
-limite_cout = int(input("Entrez la limite de coût totale: "))
-limite_temps = int(input("Entrez la limite de temps total: "))
-limite_ouvriers = int(input("Entrez le nombre total d'ouvriers disponibles: "))
+    # Objective function: Minimize total cost
+    m.setObjective(sum(couts[comp] * x[comp] for comp in composants), GRB.MAXIMIZE)
 
-# Créer le modèle
-m = Model()
+    # Viscosity constraints
 
-# Ajouter les variables
-x = {i: m.addVar(vtype=GRB.INTEGER, name=f"x_{i}") for i in range(n)}
+    m.addConstr(sum(viscosite[comp] * x[comp] for comp in composants) <= visco_max, "max_viscosity")
 
-# Fonction objectif
-m.setObjective(sum(profit_par_produit[i] * x[i] for i in range(n)), GRB.MAXIMIZE)
+    # Max garbage constraint
+    m.addConstr(sum(densite[comp] * x[comp] for comp in composants) <= max_garbage, "max_garbage")
 
-# Ajouter les contraintes
-m.addConstr(sum(couts[i] * x[i] for i in range(n)) <= limite_cout, "Contrainte_de_cout")
-m.addConstr(sum(durees[i] * x[i] for i in range(n)) <= limite_temps, "Contrainte_de_temps")
-m.addConstr(sum(ouvriers_necessaires[i] * x[i] for i in range(n)) <= limite_ouvriers, "Contrainte_de_ouvriers")
 
-# Optimiser le modèle
-m.optimize()
 
-# Afficher les résultats
-if m.status == GRB.OPTIMAL:
-    print("Solution optimale trouvée:")
-    for i in range(n):
-        print(f"Produit {i}: Produire {x[i].X} unités")
-else:
-    print("Aucune solution optimale trouvée.")
+    # Optimize the model
+    m.optimize()
+
+    # Display results
+    if m.status == GRB.OPTIMAL:
+            results = {comp: x[comp].X for comp in composants}
+            total_cost = sum(couts[comp] * x[comp].X for comp in composants)
+            return {"status": "Optimal", "results": results, "total_cost": total_cost}
+    elif m.status == GRB.INFEASIBLE:
+        return {"status": "Infeasible", "message": "No solution meets the constraints."}
+    else:
+        return {"status": "Error", "message": "Optimization did not solve successfully."}

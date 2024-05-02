@@ -1,53 +1,34 @@
-from gurobipy import Model, GRB
+from gurobipy import Model, GRB, quicksum
 
-def main():
-    # Nombre de produits
-    nb_produits = int(input("Entrez le nombre de produits: "))
-    produits = [input(f"Entrez le nom du produit {i+1}: ") for i in range(nb_produits)]
-    
-    # Données d'entrée
-    demande = {p: int(input(f"Entrez la demande pour le produit {p}: ")) for p in produits}
-    cout_achat = {p: float(input(f"Entrez le coût d'achat par lot pour le produit {p}: ")) for p in produits}
-    cout_stockage = {p: float(input(f"Entrez le coût de stockage par unité pour le produit {p}: ")) for p in produits}
-    cout_fixe_commande = {p: float(input(f"Entrez le coût fixe de commande pour le produit {p}: ")) for p in produits}
-    taille_lot = {p: int(input(f"Entrez la taille du lot pour le produit {p}: ")) for p in produits}
-    capacite_stockage = int(input("Entrez la capacité totale de stockage: "))
+def solve_backpack(names, values, weights, capacity):
+    # Create a new model
+    m = Model("integer_backpack")
 
-    # Créer le modèle
-    m = Model()
+    # Number of items
+    n = len(values)
 
-    # Variables de décision
-    x = {p: m.addVar(vtype=GRB.INTEGER, name=f"lots_{p}") for p in produits}
-    y = {p: m.addVar(vtype=GRB.BINARY, name=f"commande_{p}") for p in produits}
+    # Create variables
+    # x[i] is an integer, indicating how many units of item i are included in the knapsack
+    x = m.addVars(n, vtype=GRB.INTEGER, name=["x_" + names[i] for i in range(n)])
 
-    # Fonction objectif : Minimiser les coûts totaux
-    m.setObjective(
-        sum((cout_achat[p] * x[p] * taille_lot[p] + cout_fixe_commande[p] * y[p] + cout_stockage[p] * x[p] * taille_lot[p]) for p in produits),
-        GRB.MINIMIZE
-    )
+    # Set objective: Maximize total value of the knapsack
+    m.setObjective(quicksum(values[i] * x[i] for i in range(n)), GRB.MAXIMIZE)
 
-    # Contraintes
-    # Contrainte de demande
-    for p in produits:
-        m.addConstr(x[p] * taille_lot[p] >= demande[p], f"demande_{p}")
-    
-    # Contrainte de lien entre x et y
-    for p in produits:
-        m.addConstr(x[p] <= 1000 * y[p], f"lien_{p}")  # Assure que y_p = 1 si x_p > 0
+    # Add constraint: sum of weights of selected items should be less than or equal to capacity
+    m.addConstr(quicksum(weights[i] * x[i] for i in range(n)) <= capacity, "capacity")
 
-    # Contrainte de capacité de stockage
-    m.addConstr(sum(x[p] * taille_lot[p] for p in produits) <= capacite_stockage, "capacite_stockage")
-
-    # Optimiser le modèle
+    # Optimize model
     m.optimize()
 
-    # Afficher les résultats
+    # Display solution
     if m.status == GRB.OPTIMAL:
-        print("Solution optimale trouvée:")
-        for p in produits:
-            print(f"Produit {p}: Commander {x[p].X} lots, Commande active: {y[p].X}")
+        results = {names[i]: x[i].X for i in range(n) if x[i].X > 0}
+        total_value = sum(values[i] * x[i].X for i in range(n) if x[i].X > 0)
+        return {"status": "Optimal", "results": results, "total_value": total_value}
+    elif m.status == GRB.INFEASIBLE:
+        return {"status": "Infeasible", "message": "No solution meets the constraints."}
     else:
-        print("Aucune solution optimale trouvée.")
+        return {"status": "Error", "message": "Optimization did not solve successfully."}
 
-if __name__ == "__main__":
-    main()
+
+
