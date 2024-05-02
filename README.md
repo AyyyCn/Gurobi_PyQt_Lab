@@ -15,6 +15,7 @@ PySide is recommended to run in a virtual env
 git clone https://github.com/AyyyCn/SolverOptimizer
 cd SolverOptimizer
 python -m venv venv
+venv/Scripts/activate
 pip install -r requirements.txt
 ```
 
