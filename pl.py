@@ -1,4 +1,4 @@
-from gurobipy import Model, GRB
+from gurobipy import Model, GRB, quicksum
 
 def optimize_paint_mix(decision_vars, to_maximize, constraints, limits):
     m = Model()
@@ -11,7 +11,7 @@ def optimize_paint_mix(decision_vars, to_maximize, constraints, limits):
 
     # Applying constraints
     for i, constraint in enumerate(constraints):
-        m.addConstr(sum(constraint[var] * x[var] for var in decision_vars) <= limits[i], f"constraint_{i}")
+        m.addConstr(quicksum(constraint[j] * x[j] for j in decision_vars) <= limits[i], f"constraint_{i}")
 
     # Optimize the model
     m.optimize()
@@ -25,29 +25,3 @@ def optimize_paint_mix(decision_vars, to_maximize, constraints, limits):
         return {"status": "Infeasible", "message": "No solution meets the constraints."}
     else:
         return {"status": "Error", "message": "Optimization did not solve successfully."}
-
-
-
-"""
-Example running 
-# Decision variables
-decision_vars = ['A', 'B', 'C']
-
-# Objective coefficients (profit per unit for each variable)
-to_maximize = {
-    'A': 3,  # Profit per unit for A
-    'B': 5,  # Profit per unit for B
-    'C': 2   # Profit per unit for C
-}
-
-# Constraints matrix (coefficients for constraints applied to each decision variable)
-constraints = [
-    {'A': 2, 'B': 1, 'C': 3},  # Coefficients for the first constraint (e.g., weight)
-    {'A': 1, 'B': 3, 'C': 1}   # Coefficients for the second constraint (e.g., volume)
-]
-
-# Limits for each constraint
-limits = [100, 90]  # e.g., 100 kg weight limit and 90 cubic meters volume limit
-result = optimize_paint_mix(decision_vars, to_maximize, constraints, limits)
-print(result)
-"""

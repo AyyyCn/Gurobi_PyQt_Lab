@@ -16,7 +16,7 @@ def solve_backpack(names, values, constraints, limits):
 
     # Adding constraints dynamically
     for i, constraint in enumerate(constraints):
-        m.addConstr(quicksum(constraint[j] * x[j] for j in range(n)) <= limits[i], f"constraint_{i}")
+        m.addConstr(quicksum(constraint[j] * x[j] for j in range(n - 1)) <= limits[i], f"constraint_{i}")
 
     # Optimize model
     m.optimize()
