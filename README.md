@@ -5,6 +5,7 @@
 SolverOptimizer is a Python-based application developed as part of a university laboratory project. It utilizes PyQt for GUI and Gurobi for solving optimization problems. 
 This project solves a small problem of paint mixture as a linear programming problem (LP) and the backpack problem for ILP
 
+![image](https://github.com/user-attachments/assets/a7da1389-70ab-40fb-bc49-236f487ebd42)
 
 ## Installation
 
